@@ -162,15 +162,13 @@ function normalizeOutputFormat(
 export async function parseArguments(): Promise<CliArgs> {
   let rawArgv = hideBin(process.argv);
 
-  // hack: if the first argument is the CLI entry point, remove it
-  if (
-    rawArgv.length > 0 &&
-    (rawArgv[0].endsWith('/dist/qwen-cli/cli.js') ||
-      rawArgv[0].endsWith('/dist/cli.js') ||
-      rawArgv[0].endsWith('/dist/cli/cli.js'))
-  ) {
-    rawArgv = rawArgv.slice(1);
-  }
+  // Filter out any arguments that reference the CLI entry points, especially important for packaged executables
+  rawArgv = rawArgv.filter(
+    (arg) =>
+      !arg.includes('dist/qwen-cli/cli.js') &&
+      !arg.includes('dist/cli.js') &&
+      !arg.includes('dist/cli/cli.js'),
+  );
 
   const yargsInstance = yargs(rawArgv)
     .locale('en')
@@ -754,8 +752,8 @@ export async function loadCliConfig(
   // 1. If promptInteractive (-i flag) is provided, it is explicitly interactive
   // 2. If outputFormat is stream-json or json (no matter input-format) along with query or prompt, it is non-interactive
   // 3. If no query or prompt is provided, check isTTY: TTY means interactive, non-TTY means non-interactive
-  const hasQuery = !!argv.query;
-  const hasPrompt = !!argv.prompt;
+  const hasQuery = !!argv.query && String(argv.query).trim() !== '';
+  const hasPrompt = !!argv.prompt && String(argv.prompt).trim() !== '';
   let interactive: boolean;
   if (argv.promptInteractive) {
     // Priority 1: Explicit -i flag means interactive
