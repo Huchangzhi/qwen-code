@@ -40,9 +40,9 @@ jobs:
     - name: Build executable for ${{ matrix.target }}
       run: |
         if [ "${{ matrix.target }}" = "linux-x64" ]; then
-          nexe ./dist/cli.js --target linux-x64-${{ matrix.node-version }} --output ./dist/qwen-linux --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*"
+          nexe ./dist/cli.js --target linux-x64-${{ matrix.node-version }} --output ./dist/qwen-linux --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*" --build
         elif [ "${{ matrix.target }}" = "win-x64" ]; then
-          nexe ./dist/cli.js --target windows-x64-${{ matrix.node-version }} --output ./dist/qwen.exe --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*"
+          nexe ./dist/cli.js --target windows-x64-${{ matrix.node-version }} --output ./dist/qwen.exe --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*" --build
         fi
         
     - name: Upload executable
