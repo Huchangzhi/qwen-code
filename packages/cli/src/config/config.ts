@@ -160,7 +160,7 @@ function normalizeOutputFormat(
 
 export async function parseArguments(): Promise<CliArgs> {
   // Ignore all command line arguments to force interactive mode
-  const rawArgv = [];
+  const rawArgv: string[] = [];
 
   const yargsInstance = yargs(rawArgv)
     .locale('en')
