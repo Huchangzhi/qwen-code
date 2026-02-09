@@ -34,7 +34,6 @@ jobs:
             --resource "./dist/**/*" ^
             --resource "./packages/core/dist/**/*" ^
             --resource "./packages/cli/dist/**/*" ^
-            --make "-j2" ^
             --build
         shell: bash
 
@@ -79,7 +78,7 @@ jobs:
             --resource "./dist/**/*" ^
             --resource "./packages/core/dist/**/*" ^
             --resource "./packages/cli/dist/**/*" ^
-            --make "-j2" ^
+            --make "-j4" ^
             --build
         shell: cmd
 
