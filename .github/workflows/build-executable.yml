@@ -26,17 +26,16 @@ jobs:
       - name: Install nexe
         run: npm install -g nexe
 
-      - name: Build Linux executable with max cores
+      - name: Build Linux executable
         run: |
-          nexe ./dist/cli.js ^
-            --target linux-x64-20.x ^
-            --output ./dist/qwen-linux ^
-            --resource "./dist/**/*" ^
-            --resource "./packages/core/dist/**/*" ^
-            --resource "./packages/cli/dist/**/*" ^
+          nexe ./dist/cli.js \
+            --target linux-x64-20.x \
+            --output ./dist/qwen-linux \
+            --resource "./dist/**/*" \
+            --resource "./packages/core/dist/**/*" \
+            --resource "./packages/cli/dist/**/*" \
+            --make "-j4" \
             --build
-        shell: bash
-
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
