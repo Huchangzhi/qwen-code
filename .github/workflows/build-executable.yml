@@ -28,7 +28,7 @@ jobs:
 
       - name: Build Linux executable
         run: |
-          nexe ./dist/cli.js \
+          nexe \
             --target linux-x64-20.x \
             --output ./dist/qwen-linux \
             --build
@@ -67,7 +67,7 @@ jobs:
 
       - name: Build Windows executable
         run: |
-          nexe ./dist/cli.js ^
+          nexe ^
             --target windows-x64-20.x ^
             --output ./dist/qwen.exe ^
             --make "-j4" ^
