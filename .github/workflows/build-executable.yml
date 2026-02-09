@@ -1,0 +1,90 @@
+name: Build Executable
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [22.x]
+        target: 
+          - linux-x64
+          - win-x64
+          
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        
+    - name: Build project
+      run: |
+        npm run build
+        
+    - name: Install nexe
+      run: |
+        npm install -g nexe
+        
+    - name: Build executable for ${{ matrix.target }}
+      run: |
+        if [ "${{ matrix.target }}" = "linux-x64" ]; then
+          nexe ./dist/cli.js --target linux-x64-${{ matrix.node-version }} --output ./dist/qwen-linux --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*"
+        elif [ "${{ matrix.target }}" = "win-x64" ]; then
+          nexe ./dist/cli.js --target windows-x64-${{ matrix.node-version }} --output ./dist/qwen.exe --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*"
+        fi
+        
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: qwen-executable-${{ matrix.target }}
+        path: dist/qwen*
+        
+  build-with-build-flag:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [22.x]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        
+    - name: Build project
+      run: |
+        npm run build
+        
+    - name: Install nexe
+      run: |
+        npm install -g nexe
+        
+    - name: Build executable with build flag (Linux)
+      run: |
+        nexe ./dist/cli.js --target linux-x64-${{ matrix.node-version }} --output ./dist/qwen-linux-full --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*" --build --verbose
+      timeout-minutes: 60  # Allow more time for building Node.js from source
+      
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: qwen-executable-full-linux
+        path: dist/qwen-linux-full

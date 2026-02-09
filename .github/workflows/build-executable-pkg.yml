@@ -1,0 +1,48 @@
+name: Build Executable with pkg
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [22.x]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        
+    - name: Build project
+      run: |
+        npm run build
+        
+    - name: Install @yao-pkg/pkg
+      run: |
+        npm install -g @yao-pkg/pkg
+        
+    - name: Build executable with pkg
+      run: |
+        # Create a simple entry point
+        echo '#!/usr/bin/env node' > standalone-entry.cjs
+        echo 'require("./dist/cli.js").run().catch(console.error);' >> standalone-entry.cjs
+        pkg standalone-entry.cjs --target node${{ matrix.node-version }}-linux-x64 --output ./dist/qwen-pkg-linux
+        
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: qwen-pkg-executable
+        path: dist/qwen-pkg-linux
