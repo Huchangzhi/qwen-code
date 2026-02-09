@@ -26,15 +26,21 @@ jobs:
       - name: Install nexe
         run: npm install -g nexe
 
-      - name: Build Linux executable
+      - name: Get CPU core count
+        id: cpu-cores
+        run: echo "CORES=$(nproc)" >> $GITHUB_OUTPUT
+
+      - name: Build Linux executable with max cores
         run: |
-          nexe ./dist/cli.js \
-            --target linux-x64-20.x \
-            --output ./dist/qwen-linux \
-            --resource "./dist/**/*" \
-            --resource "./packages/core/dist/**/*" \
-            --resource "./packages/cli/dist/**/*" \
+          nexe ./dist/cli.js ^
+            --target linux-x64-20.x ^
+            --output ./dist/qwen-linux ^
+            --resource "./dist/**/*" ^
+            --resource "./packages/core/dist/**/*" ^
+            --resource "./packages/cli/dist/**/*" ^
+            --make "-j${{ steps.cpu-cores.outputs.CORES }}" ^
             --build
+        shell: bash
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
@@ -57,10 +63,17 @@ jobs:
 
       - name: Build project
         run: npm run build
-        shell: bash  # 确保使用 Git Bash 执行，保持脚本兼容性
+        shell: bash
 
       - name: Install nexe
         run: npm install -g nexe
+
+      - name: Get CPU core count (for reference)
+        id: cpu-cores
+        run: |
+          $cores = [System.Environment]::ProcessorCount
+          echo "CORES=$cores" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          Write-Host "CPU cores available: $cores"
 
       - name: Build Windows executable
         run: |
@@ -70,8 +83,9 @@ jobs:
             --resource "./dist/**/*" ^
             --resource "./packages/core/dist/**/*" ^
             --resource "./packages/cli/dist/**/*" ^
+            --make "-j2" ^
             --build
-        shell: cmd  # Windows 下使用 cmd 以正确解析 ^ 换行符
+        shell: cmd
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
