@@ -7,84 +7,74 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [22.x]
-        target: 
-          - linux-x64
-          - win-x64
-          
+  build-linux:
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        
-    - name: Install dependencies
-      run: |
-        npm ci
-        
-    - name: Build project
-      run: |
-        npm run build
-        
-    - name: Install nexe
-      run: |
-        npm install -g nexe
-        
-    - name: Build executable for ${{ matrix.target }}
-      run: |
-        if [ "${{ matrix.target }}" = "linux-x64" ]; then
-          nexe ./dist/cli.js --target linux-x64-${{ matrix.node-version }} --output ./dist/qwen-linux --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*" --build
-        elif [ "${{ matrix.target }}" = "win-x64" ]; then
-          nexe ./dist/cli.js --target windows-x64-${{ matrix.node-version }} --output ./dist/qwen.exe --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*" --build
-        fi
-        
-    - name: Upload executable
-      uses: actions/upload-artifact@v4
-      with:
-        name: qwen-executable-${{ matrix.target }}
-        path: dist/qwen*
-        
-  build-with-build-flag:
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [22.x]
-        
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Install nexe
+        run: npm install -g nexe
+
+      - name: Build Linux executable
+        run: |
+          nexe ./dist/cli.js \
+            --target linux-x64-20.x \
+            --output ./dist/qwen-linux \
+            --resource "./dist/**/*" \
+            --resource "./packages/core/dist/**/*" \
+            --resource "./packages/cli/dist/**/*" \
+            --build
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen-executable-linux-x64
+          path: dist/qwen-linux
+
+  build-windows:
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        
-    - name: Install dependencies
-      run: |
-        npm ci
-        
-    - name: Build project
-      run: |
-        npm run build
-        
-    - name: Install nexe
-      run: |
-        npm install -g nexe
-        
-    - name: Build executable with build flag (Linux)
-      run: |
-        nexe ./dist/cli.js --target linux-x64-${{ matrix.node-version }} --output ./dist/qwen-linux-full --resource "./dist/**/*" --resource "./packages/core/dist/**/*" --resource "./packages/cli/dist/**/*" --build --verbose
-      timeout-minutes: 60  # Allow more time for building Node.js from source
-      
-    - name: Upload executable
-      uses: actions/upload-artifact@v4
-      with:
-        name: qwen-executable-full-linux
-        path: dist/qwen-linux-full
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        shell: bash  # 确保使用 Git Bash 执行，保持脚本兼容性
+
+      - name: Install nexe
+        run: npm install -g nexe
+
+      - name: Build Windows executable
+        run: |
+          nexe ./dist/cli.js ^
+            --target windows-x64-20.x ^
+            --output ./dist/qwen.exe ^
+            --resource "./dist/**/*" ^
+            --resource "./packages/core/dist/**/*" ^
+            --resource "./packages/cli/dist/**/*" ^
+            --build
+        shell: cmd  # Windows 下使用 cmd 以正确解析 ^ 换行符
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen-executable-win-x64
+          path: dist/qwen.exe
