@@ -34,7 +34,6 @@ jobs:
             --resource "./dist/**/*" \
             --resource "./packages/core/dist/**/*" \
             --resource "./packages/cli/dist/**/*" \
-            --make "-j4" \
             --build
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
