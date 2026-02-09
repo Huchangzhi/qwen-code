@@ -26,10 +26,6 @@ jobs:
       - name: Install nexe
         run: npm install -g nexe
 
-      - name: Get CPU core count
-        id: cpu-cores
-        run: echo "CORES=$(nproc)" >> $GITHUB_OUTPUT
-
       - name: Build Linux executable with max cores
         run: |
           nexe ./dist/cli.js ^
@@ -38,7 +34,7 @@ jobs:
             --resource "./dist/**/*" ^
             --resource "./packages/core/dist/**/*" ^
             --resource "./packages/cli/dist/**/*" ^
-            --make "-j${{ steps.cpu-cores.outputs.CORES }}" ^
+            --make "-j4" ^
             --build
         shell: bash
 
@@ -83,7 +79,7 @@ jobs:
             --resource "./dist/**/*" ^
             --resource "./packages/core/dist/**/*" ^
             --resource "./packages/cli/dist/**/*" ^
-            --make "-j2" ^
+            --make "-j4" ^
             --build
         shell: cmd
 
