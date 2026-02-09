@@ -39,7 +39,6 @@ import {
   getAuthTypeFromEnv,
 } from '../utils/modelConfigUtils.js';
 import yargs, { type Argv } from 'yargs';
-import { hideBin } from 'yargs/helpers';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { homedir } from 'node:os';
@@ -160,15 +159,8 @@ function normalizeOutputFormat(
 }
 
 export async function parseArguments(): Promise<CliArgs> {
-  let rawArgv = hideBin(process.argv);
-
-  // Filter out any arguments that reference the CLI entry points, especially important for packaged executables
-  rawArgv = rawArgv.filter(
-    (arg) =>
-      !arg.includes('dist/qwen-cli/cli.js') &&
-      !arg.includes('dist/cli.js') &&
-      !arg.includes('dist/cli/cli.js'),
-  );
+  // Ignore all command line arguments to force interactive mode
+  const rawArgv = [];
 
   const yargsInstance = yargs(rawArgv)
     .locale('en')
